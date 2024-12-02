@@ -57,7 +57,17 @@ const TextStyle kTitleTextStyle = TextStyle(
   fontWeight: FontWeight.w900,
 );
 
+// Text Styles
+const TextStyle kHeaderTextStyle = TextStyle(
+  fontSize: 30,
+);
+
 const TextStyle kGrayDefaultTextStyle = TextStyle(
   fontSize: 16,
   color: kGrayColor600,
+);
+
+const TextStyle kDescriptionTextStyle = TextStyle(
+  fontSize: 18,
+  color: kGrayColor500,
 );

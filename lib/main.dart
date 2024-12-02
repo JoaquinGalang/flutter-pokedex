@@ -5,7 +5,7 @@ import 'package:flutter_pokedex/screens/pokedex_menu_screen.dart';
 void main() {
   runApp(
     const MaterialApp(
-      home: PokedexMenuScreen(),
+      home: PokedexEntryScreen(),
       debugShowCheckedModeBanner: false,
     ),
   );

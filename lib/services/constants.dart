@@ -59,7 +59,7 @@ const TextStyle kTitleTextStyle = TextStyle(
 
 // Text Styles
 const TextStyle kHeaderTextStyle = TextStyle(
-  fontSize: 30,
+  fontSize: 26,
 );
 
 const TextStyle kGrayDefaultTextStyle = TextStyle(
@@ -67,7 +67,7 @@ const TextStyle kGrayDefaultTextStyle = TextStyle(
   color: kGrayColor600,
 );
 
-const TextStyle kDescriptionTextStyle = TextStyle(
-  fontSize: 18,
+const TextStyle kLightGrayDefaultTextStyle = TextStyle(
+  fontSize: 16,
   color: kGrayColor500,
 );

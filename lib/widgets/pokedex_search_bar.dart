@@ -22,7 +22,7 @@ class PokedexSearchBar extends StatelessWidget {
               prefixIcon: Icon(Icons.search, size: 28),
               prefixIconColor: kGrayColor600,
               contentPadding: EdgeInsets.only(top: 12, bottom: 10),
-              hintText: 'What Pokémon are you looking for?',
+              hintText: 'Search for a Pokémon',
               hintStyle: TextStyle(
                 color: kGrayColor500,
               )

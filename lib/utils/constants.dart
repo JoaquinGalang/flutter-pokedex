@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 
+// Stats
+const int maxIV = 31;
+const int maxEV = 252;
+const double beneficialNatureMultiplier = 1.1;
+
 // Grays
 const kGrayColor600 = Color(0xFF545454);
 const kGrayColor500 = Color(0xFFA6A6A6);

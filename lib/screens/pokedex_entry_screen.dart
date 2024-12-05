@@ -3,6 +3,9 @@ import 'package:flutter_pokedex/utils/constants.dart';
 import 'package:flutter_pokedex/utils/helper_functions.dart';
 import 'package:flutter_pokedex/services/pokeapi_service.dart';
 import 'package:flutter_pokedex/widgets/pokemon_type_box.dart';
+import 'package:flutter_pokedex/widgets/exit_button.dart';
+import 'package:flutter_pokedex/widgets/physical_quantity_card.dart';
+import 'package:flutter_pokedex/widgets/stat_linear_indicator.dart';
 
 // TODO: Add flavor text, stats, and weaknesses
 
@@ -17,7 +20,8 @@ class PokedexEntryScreen extends StatefulWidget {
 
 class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
   final PokeApiService _pokeApiService = PokeApiService();
-  Map<String, dynamic> pokemonData = {
+
+  Map<String, dynamic> pokemon = {
     'id': null,
     'name': null,
     'pokemonTypes': [],
@@ -25,46 +29,72 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
     'flavorText': null,
     'height': null,
     'weight': null,
-    // 'hitPoints': null,
-    // 'attack': null,
-    // 'defense': null,
-    // 'specialAtk': null,
-    // 'specialDef': null,
-    // 'speed': null,
   };
+
+  Map<String, double> pokemonStats = {
+    'hitPoints': 0,
+    'attack': 0,
+    'defense': 0,
+    'specialAtk': 0,
+    'specialDef': 0,
+    'speed': 0,
+  };
+
+  Map<String, double> pokemonMaxStats = {
+    'hitPoints': 0,
+    'attack': 0,
+    'defense': 0,
+    'specialAtk': 0,
+    'specialDef': 0,
+    'speed': 0,
+  };
+
   Color? brightColor;
   Color? darkColor;
   bool _isLoading = true;
 
-
   Future<void> loadPokedexEntry() async {
-    print(_isLoading);
-    pokemonData['id'] = formatPokemonID(widget.pokemonData['id']);
+
+    // Load pokemon essential pokemon details (e.g name, id, types, etc.)
+    pokemon['id'] = formatPokemonID(widget.pokemonData['id']);
     String name = widget.pokemonData['name'];
-    pokemonData['name'] = name.capitalize();
-    pokemonData['pokemonTypes'] = getPokemonTypes(widget.pokemonData['types']);
-    pokemonData['primaryType'] = pokemonData['pokemonTypes'][0];
-    brightColor = brightColors[pokemonData['primaryType']];
-    darkColor = darkColors[pokemonData['primaryType']];
-    pokemonData['image'] = widget.pokemonData['sprites']['front_default'];
+    pokemon['name'] = name.capitalize();
+    pokemon['pokemonTypes'] = getPokemonTypes(widget.pokemonData['types']);
+    pokemon['primaryType'] = pokemon['pokemonTypes'][0];
+    brightColor = brightColors[pokemon['primaryType']];
+    darkColor = darkColors[pokemon['primaryType']];
+    pokemon['image'] = widget.pokemonData['sprites']['front_default'];
     String flavorText = await _pokeApiService.getPokemonFlavorText(
         id: widget.pokemonData['id']);
-    pokemonData['flavorText'] = flavorText.replaceAll('\n', ' ');
-    String height = '${(widget.pokemonData['height'] / 3.048).toStringAsFixed(2)}\"';
-    pokemonData['height'] = height.replaceAll('.','\' ');
-    pokemonData['weight'] = '${(widget.pokemonData['weight'] / 4.536).toStringAsFixed(2)} lbs';
-    print('!!! DEBUG !!!');
-    // print(pokemonData['stats'][0]['base_stat']);
-    // pokemonData['hitPoints'] = pokemonData['stats'][0]['base_stat'];
-    // pokemonData['attack'] = pokemonData['stats'][1]['base_stat'];
-    // pokemonData['defense'] = pokemonData['stats'][2]['base_stat'];
-    // pokemonData['specialAtk'] = pokemonData['stats'][3]['base_stat'];
-    // pokemonData['specialDef'] = pokemonData['stats'][4]['base_stat'];
-    // pokemonData['speed'] = pokemonData['stats'][5]['base_stat'];
+    flavorText = flavorText.replaceAll('', ' ');
+    pokemon['flavorText'] = flavorText.replaceAll('\n', ' ');
+
+    // Load and format weight and height
+    String height =
+        '${(widget.pokemonData['height'] / 3.048).toStringAsFixed(2)}\"';
+    pokemon['height'] = height.replaceAll('.', '\' ');
+    pokemon['weight'] =
+        '${(widget.pokemonData['weight'] / 4.536).toStringAsFixed(2)} lbs';
+
+    // Load pokemon base base stats
+    pokemonStats['hitPoints'] = widget.pokemonData['stats'][0]['base_stat'].toDouble();
+    pokemonStats['attack'] = widget.pokemonData['stats'][1]['base_stat'].toDouble();
+    pokemonStats['defense'] = widget.pokemonData['stats'][2]['base_stat'].toDouble();
+    pokemonStats['specialAtk'] = widget.pokemonData['stats'][3]['base_stat'].toDouble();
+    pokemonStats['specialDef'] = widget.pokemonData['stats'][4]['base_stat'].toDouble();
+    pokemonStats['speed'] = widget.pokemonData['stats'][5]['base_stat'].toDouble();
+
+    // Load pokemon max stats
+    pokemonMaxStats['hitPoints'] = calculateMaxHP(pokemonStats['hitPoints']!);
+    pokemonMaxStats['attack'] = calculateMaxStat(baseStat: pokemonStats['attack']!);
+    pokemonMaxStats['defense'] = calculateMaxStat(baseStat: pokemonStats['defense']!);
+    pokemonMaxStats['specialAtk'] = calculateMaxStat(baseStat: pokemonStats['specialAtk']!);
+    pokemonMaxStats['specialDef'] = calculateMaxStat(baseStat: pokemonStats['specialDef']!);
+    pokemonMaxStats['speed'] = calculateMaxStat(baseStat: pokemonStats['speed']!);
+
     setState(() {
       _isLoading = false;
     });
-    print(_isLoading);
   }
 
   List<Widget> pokemonTypeCardBuilder(List<String> pokemonTypes) {
@@ -112,52 +142,61 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
                       child: ListView(
                         children: [
                           const SizedBox(height: 15),
-                          Row(
+                          Stack(
                             children: [
-                              Expanded(
-                                child: Center(
-                                  child: AspectRatio(
-                                    aspectRatio: 1 / 1,
-                                    child: Image(
-                                      fit: BoxFit.fill,
-                                      image: NetworkImage(
-                                        pokemonData['image'],
+                              const Align(
+                                alignment: Alignment.topRight,
+                                child: ExitButton(),
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Center(
+                                      child: AspectRatio(
+                                        aspectRatio: 1 / 1,
+                                        child: Image(
+                                          fit: BoxFit.fill,
+                                          image: NetworkImage(
+                                            pokemon['image'],
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ),
-                              Expanded(
-                                flex: 2,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                        pokemonData['id'],
-                                        style: kGrayDefaultTextStyle),
-                                    Text(pokemonData['name'],
-                                        style: kTitleTextStyle),
-                                    Row(
-                                      children: pokemonTypeCardBuilder(pokemonData['pokemonTypes']),
-                                    )
-                                  ],
-                                ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(pokemon['id'],
+                                            style: kGrayDefaultTextStyle),
+                                        Text(pokemon['name'],
+                                            style: kTitleTextStyle),
+                                        Row(
+                                          children: pokemonTypeCardBuilder(
+                                              pokemon['pokemonTypes']),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                           Text(
-                            pokemonData['flavorText'],
+                            pokemon['flavorText'],
                             style: kLightGrayDefaultTextStyle,
                           ),
                           const SizedBox(height: 15),
                           Row(
                             children: [
                               PhysicalQuantityCard(
-                                quantity: pokemonData['height'],
+                                quantity: pokemon['height'],
                                 type: 'HEIGHT',
                               ),
                               PhysicalQuantityCard(
-                                quantity: pokemonData['weight'],
+                                quantity: pokemon['weight'],
                                 type: 'WEIGHT',
                               ),
                             ],
@@ -168,38 +207,38 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
                             children: [
                               StatLinearIndicator(
                                 stat: 'Max HP',
-                                value: 268,
-                                maxValue: 362,
+                                value: pokemonStats['hitPoints']!,
+                                maxValue: pokemonMaxStats['hitPoints']!,
                                 color: brightColor!,
                               ),
                               StatLinearIndicator(
                                 stat: 'Attack',
-                                value: 153,
-                                maxValue: 292,
+                                value: pokemonStats['attack']!,
+                                maxValue: pokemonMaxStats['attack']!,
                                 color: brightColor!,
                               ),
                               StatLinearIndicator(
                                 stat: 'Defense',
-                                value: 184,
-                                maxValue: 328,
+                                value: pokemonStats['defense']!,
+                                maxValue: pokemonMaxStats['defense']!,
                                 color: brightColor!,
                               ),
                               StatLinearIndicator(
                                 stat: 'Sp. Atk',
-                                value: 157,
-                                maxValue: 295,
+                                value: pokemonStats['specialAtk']!,
+                                maxValue: pokemonMaxStats['specialAtk']!,
                                 color: brightColor!,
                               ),
                               StatLinearIndicator(
                                 stat: 'Sp. Def',
-                                value: 193,
-                                maxValue: 339,
+                                value: pokemonStats['specialDef']!,
+                                maxValue: pokemonMaxStats['specialDef']!,
                                 color: brightColor!,
                               ),
                               StatLinearIndicator(
                                 stat: 'Speed',
-                                value: 144,
-                                maxValue: 280,
+                                value: pokemonStats['speed']!,
+                                maxValue: pokemonMaxStats['speed']!,
                                 color: brightColor!,
                               ),
                             ],
@@ -217,95 +256,6 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
                     ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class StatLinearIndicator extends StatelessWidget {
-  const StatLinearIndicator({
-    super.key,
-    required this.stat,
-    required this.value,
-    required this.maxValue,
-    required this.color,
-  });
-
-  final String stat;
-  final double value;
-  final double maxValue;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text(stat, style: kLightGrayDefaultTextStyle),
-          ),
-          Expanded(
-            flex: 8,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 30),
-              child: LinearProgressIndicator(
-                color: color,
-                backgroundColor: kGrayColor200,
-                minHeight: 8,
-                value: value / maxValue,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class PhysicalQuantityCard extends StatelessWidget {
-  const PhysicalQuantityCard({
-    super.key,
-    required this.quantity,
-    required this.type,
-  });
-
-  final String quantity;
-  final String type;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.all(5.0),
-        child: Container(
-          height: 85,
-          decoration: BoxDecoration(
-            color: kGrayColor200,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                quantity,
-                style: TextStyle(
-                  color: kGrayColor600,
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                type,
-                style: TextStyle(
-                  color: kGrayColor500,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

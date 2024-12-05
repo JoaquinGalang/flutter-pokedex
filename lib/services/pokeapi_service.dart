@@ -13,4 +13,11 @@ class PokeApiService {
     return jsonData;
   }
 
+  dynamic getPokemonFlavorText({required int id}) async {
+    var url = Uri.parse('$urlPrefix/pokemon-species/$id');
+    var response = await http.get(url);
+    var jsonData = jsonDecode(response.body);
+    return jsonData['flavor_text_entries'][0]['flavor_text'];
+  }
+
 }

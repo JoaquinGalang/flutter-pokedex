@@ -1,9 +1,95 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pokedex/utils/constants.dart';
+import 'package:flutter_pokedex/utils/helper_functions.dart';
+import 'package:flutter_pokedex/services/pokeapi_service.dart';
 import 'package:flutter_pokedex/widgets/pokemon_type_box.dart';
 
-class PokedexEntryScreen extends StatelessWidget {
-  const PokedexEntryScreen({super.key});
+// TODO: Add flavor text, stats, and weaknesses
+
+class PokedexEntryScreen extends StatefulWidget {
+  const PokedexEntryScreen({super.key, required this.pokemonData});
+
+  final Map pokemonData;
+
+  @override
+  State<PokedexEntryScreen> createState() => _PokedexEntryScreenState();
+}
+
+class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
+  final PokeApiService _pokeApiService = PokeApiService();
+  Map<String, dynamic> pokemonData = {
+    'id': null,
+    'name': null,
+    'pokemonTypes': [],
+    'image': null,
+    'flavorText': null,
+    'height': null,
+    'weight': null,
+    // 'hitPoints': null,
+    // 'attack': null,
+    // 'defense': null,
+    // 'specialAtk': null,
+    // 'specialDef': null,
+    // 'speed': null,
+  };
+  Color? brightColor;
+  Color? darkColor;
+  bool _isLoading = true;
+
+
+  Future<void> loadPokedexEntry() async {
+    print(_isLoading);
+    pokemonData['id'] = formatPokemonID(widget.pokemonData['id']);
+    String name = widget.pokemonData['name'];
+    pokemonData['name'] = name.capitalize();
+    pokemonData['pokemonTypes'] = getPokemonTypes(widget.pokemonData['types']);
+    pokemonData['primaryType'] = pokemonData['pokemonTypes'][0];
+    brightColor = brightColors[pokemonData['primaryType']];
+    darkColor = darkColors[pokemonData['primaryType']];
+    pokemonData['image'] = widget.pokemonData['sprites']['front_default'];
+    String flavorText = await _pokeApiService.getPokemonFlavorText(
+        id: widget.pokemonData['id']);
+    pokemonData['flavorText'] = flavorText.replaceAll('\n', ' ');
+    String height = '${(widget.pokemonData['height'] / 3.048).toStringAsFixed(2)}\"';
+    pokemonData['height'] = height.replaceAll('.','\' ');
+    pokemonData['weight'] = '${(widget.pokemonData['weight'] / 4.536).toStringAsFixed(2)} lbs';
+    print('!!! DEBUG !!!');
+    // print(pokemonData['stats'][0]['base_stat']);
+    // pokemonData['hitPoints'] = pokemonData['stats'][0]['base_stat'];
+    // pokemonData['attack'] = pokemonData['stats'][1]['base_stat'];
+    // pokemonData['defense'] = pokemonData['stats'][2]['base_stat'];
+    // pokemonData['specialAtk'] = pokemonData['stats'][3]['base_stat'];
+    // pokemonData['specialDef'] = pokemonData['stats'][4]['base_stat'];
+    // pokemonData['speed'] = pokemonData['stats'][5]['base_stat'];
+    setState(() {
+      _isLoading = false;
+    });
+    print(_isLoading);
+  }
+
+  List<Widget> pokemonTypeCardBuilder(List<String> pokemonTypes) {
+    List<Widget> typeCardList = [];
+    for (var type in pokemonTypes) {
+      typeCardList.add(PokemonTypeBox(type: type));
+    }
+    return typeCardList;
+  }
+
+  List<String> getPokemonTypes(List types) {
+    List<String> typeList = [];
+    for (int i = 0; i < types.length; i++) {
+      String type = types[i]['type']['name'];
+      typeList.add(type);
+    }
+    return typeList;
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    loadPokedexEntry();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,111 +100,121 @@ class PokedexEntryScreen extends StatelessWidget {
             Container(
               width: double.infinity,
               height: 12,
-              color: darkColors['water'],
+              color: darkColor,
             ),
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: ListView(
-                  children: [
-                    const SizedBox(height: 15),
-                    const Row(
-                      children: [
-                        Expanded(
-                          child: Center(
-                            child: AspectRatio(
-                              aspectRatio: 1 / 1,
-                              child: Image(
-                                fit: BoxFit.fill,
-                                image: NetworkImage(
-                                    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/9.png'),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+              child: (_isLoading)
+                  ? const Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: ListView(
+                        children: [
+                          const SizedBox(height: 15),
+                          Row(
                             children: [
-                              Text('#007', style: kGrayDefaultTextStyle),
-                              Text('Blastoise', style: kTitleTextStyle),
-                              PokemonTypeBox(type: 'water')
+                              Expanded(
+                                child: Center(
+                                  child: AspectRatio(
+                                    aspectRatio: 1 / 1,
+                                    child: Image(
+                                      fit: BoxFit.fill,
+                                      image: NetworkImage(
+                                        pokemonData['image'],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                        pokemonData['id'],
+                                        style: kGrayDefaultTextStyle),
+                                    Text(pokemonData['name'],
+                                        style: kTitleTextStyle),
+                                    Row(
+                                      children: pokemonTypeCardBuilder(pokemonData['pokemonTypes']),
+                                    )
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
-                        ),
-                      ],
+                          Text(
+                            pokemonData['flavorText'],
+                            style: kLightGrayDefaultTextStyle,
+                          ),
+                          const SizedBox(height: 15),
+                          Row(
+                            children: [
+                              PhysicalQuantityCard(
+                                quantity: pokemonData['height'],
+                                type: 'HEIGHT',
+                              ),
+                              PhysicalQuantityCard(
+                                quantity: pokemonData['weight'],
+                                type: 'WEIGHT',
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 15),
+                          const Text('Base Stats', style: kHeaderTextStyle),
+                          Column(
+                            children: [
+                              StatLinearIndicator(
+                                stat: 'Max HP',
+                                value: 268,
+                                maxValue: 362,
+                                color: brightColor!,
+                              ),
+                              StatLinearIndicator(
+                                stat: 'Attack',
+                                value: 153,
+                                maxValue: 292,
+                                color: brightColor!,
+                              ),
+                              StatLinearIndicator(
+                                stat: 'Defense',
+                                value: 184,
+                                maxValue: 328,
+                                color: brightColor!,
+                              ),
+                              StatLinearIndicator(
+                                stat: 'Sp. Atk',
+                                value: 157,
+                                maxValue: 295,
+                                color: brightColor!,
+                              ),
+                              StatLinearIndicator(
+                                stat: 'Sp. Def',
+                                value: 193,
+                                maxValue: 339,
+                                color: brightColor!,
+                              ),
+                              StatLinearIndicator(
+                                stat: 'Speed',
+                                value: 144,
+                                maxValue: 280,
+                                color: brightColor!,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 15),
+                          const Text('Weaknesses', style: kHeaderTextStyle),
+                          const Row(
+                            children: [
+                              PokemonTypeBox(type: 'electric'),
+                              PokemonTypeBox(type: 'grass'),
+                            ],
+                          )
+                        ],
+                      ),
                     ),
-                    const Text(
-                      'Blastoise has water spouts that protrude from its shell. The water spouts are very accurate. They can shoot bullets of water with enough accuracy to strike empty cans from a distance of over 160 feet.',
-                      style: kLightGrayDefaultTextStyle,
-                    ),
-                    const SizedBox(height: 15),
-                    const Row(
-                      children: [
-                        PhysicalQuantityCard(
-                          quantity: "5'03\"",
-                          type: 'HEIGHT',
-                        ),
-                        PhysicalQuantityCard(
-                          quantity: "188.5 lbs",
-                          type: 'WEIGHT',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 15),
-                    const Text('Base Stats', style: kHeaderTextStyle),
-                    Column(
-                      children: [
-                        StatLinearIndicator(
-                          stat: 'Max HP',
-                          value: 268,
-                          maxValue: 362,
-                          color: brightColors['water']!,
-                        ),
-                        StatLinearIndicator(
-                          stat: 'Attack',
-                          value: 153,
-                          maxValue: 292,
-                          color: brightColors['water']!,
-                        ),
-                        StatLinearIndicator(
-                          stat: 'Defense',
-                          value: 184,
-                          maxValue: 328,
-                          color: brightColors['water']!,
-                        ),
-                        StatLinearIndicator(
-                          stat: 'Sp. Atk',
-                          value: 157,
-                          maxValue: 295,
-                          color: brightColors['water']!,
-                        ),
-                        StatLinearIndicator(
-                          stat: 'Sp. Def',
-                          value: 193,
-                          maxValue: 339,
-                          color: brightColors['water']!,
-                        ),
-                        StatLinearIndicator(
-                          stat: 'Speed',
-                          value: 144,
-                          maxValue: 280,
-                          color: brightColors['water']!,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 15),
-                    const Text('Weaknesses', style: kHeaderTextStyle),
-                    const Row(
-                      children: [
-                        PokemonTypeBox(type: 'electric'),
-                        PokemonTypeBox(type: 'grass'),
-                      ],
-                    )
-                  ],
-                ),
-              ),
             ),
           ],
         ),

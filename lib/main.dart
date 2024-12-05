@@ -7,7 +7,7 @@ void main() async {
   PokeApiService pokeApiService = PokeApiService();
   var jsonData = await pokeApiService.getPokemonData(id: 1);
   runApp(
-    const MaterialApp(
+    MaterialApp(
       home: PokedexMenuScreen(),
       debugShowCheckedModeBanner: false,
     ),

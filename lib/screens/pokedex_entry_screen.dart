@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pokedex/services/constants.dart';
-import 'package:flutter_pokedex/widgets/pokedex_entry_card.dart';
+import 'package:flutter_pokedex/utils/constants.dart';
+import 'package:flutter_pokedex/widgets/pokemon_type_box.dart';
 
 class PokedexEntryScreen extends StatelessWidget {
   const PokedexEntryScreen({super.key});
@@ -43,7 +43,7 @@ class PokedexEntryScreen extends StatelessWidget {
                             children: [
                               Text('#007', style: kGrayDefaultTextStyle),
                               Text('Blastoise', style: kTitleTextStyle),
-                              PokemonTypeCard(type: 'water')
+                              PokemonTypeBox(type: 'water')
                             ],
                           ),
                         ),
@@ -112,8 +112,8 @@ class PokedexEntryScreen extends StatelessWidget {
                     const Text('Weaknesses', style: kHeaderTextStyle),
                     const Row(
                       children: [
-                        PokemonTypeCard(type: 'electric'),
-                        PokemonTypeCard(type: 'grass'),
+                        PokemonTypeBox(type: 'electric'),
+                        PokemonTypeBox(type: 'grass'),
                       ],
                     )
                   ],

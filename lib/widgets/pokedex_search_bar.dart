@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pokedex/services/constants.dart';
+import 'package:flutter_pokedex/utils/constants.dart';
 
 class PokedexSearchBar extends StatelessWidget {
   const PokedexSearchBar({

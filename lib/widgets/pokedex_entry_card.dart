@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pokedex/services/constants.dart';
-import 'package:flutter_pokedex/services/helper_functions.dart';
+import 'package:flutter_pokedex/utils/constants.dart';
+import 'package:flutter_pokedex/widgets/pokemon_type_box.dart';
 
 class PokedexEntryCard extends StatelessWidget {
   const PokedexEntryCard({
@@ -17,7 +17,7 @@ class PokedexEntryCard extends StatelessWidget {
   List<Widget> pokemonTypeCardBuilder() {
     List<Widget> typeCardList = [];
     for (var type in pokemonTypes) {
-      typeCardList.add(PokemonTypeCard(type: type));
+      typeCardList.add(PokemonTypeBox(type: type));
     }
     return typeCardList;
   }
@@ -25,7 +25,7 @@ class PokedexEntryCard extends StatelessWidget {
   String formatPokemonID(int pokemonID) {
     String stringID = pokemonID.toString();
     int lengthOfID = stringID.length;
-    String formattedID = '#' + '0'*(4-lengthOfID) + stringID;
+    String formattedID = '#' + '0' * (4 - lengthOfID) + stringID;
     return formattedID;
   }
 
@@ -63,7 +63,8 @@ class PokedexEntryCard extends StatelessWidget {
                 ],
               ),
               Image(
-                image: NetworkImage('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/$pokemonID.png'),
+                image: NetworkImage(
+                    'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/$pokemonID.png'),
               )
             ],
           ),
@@ -73,35 +74,3 @@ class PokedexEntryCard extends StatelessWidget {
   }
 }
 
-class PokemonTypeCard extends StatelessWidget {
-  const PokemonTypeCard({
-    super.key,
-    required this.type,
-  });
-
-  final String type;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 5),
-      child: Container(
-        width: 60,
-        height: 25,
-        decoration: BoxDecoration(
-          color: darkColors[type],
-          borderRadius: BorderRadius.circular(5),
-        ),
-        child: Center(
-          child: Text(
-            type.capitalize(),
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

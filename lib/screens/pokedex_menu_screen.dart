@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_pokedex/services/constants.dart';
+import 'package:flutter_pokedex/utils/constants.dart';
 import 'package:flutter_pokedex/widgets/pokedex_search_bar.dart';
 import 'package:flutter_pokedex/widgets/pokedex_entry_card.dart';
 
@@ -10,12 +10,61 @@ class PokedexMenuScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    List<Widget> pokedexEntries = [
+      PokedexEntryCard(
+        pokemonID: 1,
+        pokemonName: 'Bulbasaur',
+        pokemonTypes: ['grass', 'poison'],
+      ),
+      PokedexEntryCard(
+        pokemonID: 2,
+        pokemonName: 'Ivysaur',
+        pokemonTypes: ['grass', 'poison'],
+      ),
+      PokedexEntryCard(
+        pokemonID: 3,
+        pokemonName: 'Venusaur',
+        pokemonTypes: ['grass', 'poison'],
+      ),
+      PokedexEntryCard(
+        pokemonID: 4,
+        pokemonName: 'Charmander',
+        pokemonTypes: ['fire'],
+      ),
+      PokedexEntryCard(
+        pokemonID: 5,
+        pokemonName: 'Charmeleon',
+        pokemonTypes: ['fire'],
+      ),
+      PokedexEntryCard(
+        pokemonID: 6,
+        pokemonName: 'Charizard',
+        pokemonTypes: ['fire', 'flying'],
+      ),
+      PokedexEntryCard(
+        pokemonID: 7,
+        pokemonName: 'Squirtle',
+        pokemonTypes: ['water'],
+      ),
+      PokedexEntryCard(
+        pokemonID: 8,
+        pokemonName: 'Wartortle',
+        pokemonTypes: ['water'],
+      ),
+      PokedexEntryCard(
+        pokemonID: 9,
+        pokemonName: 'Blastoise',
+        pokemonTypes: ['water'],
+      ),
+    ];
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 35),
-          child: ListView(
-            children: const [
+          child: Column(
+            children: [
               SizedBox(height: 20),
               Text(
                 'Pokédex',
@@ -28,51 +77,11 @@ class PokedexMenuScreen extends StatelessWidget {
               ),
               SizedBox(height: 10),
               PokedexSearchBar(),
-              SizedBox(height: 30),
-              PokedexEntryCard(
-                pokemonID: 1,
-                pokemonName: 'Bulbasaur',
-                pokemonTypes: ['grass', 'poison'],
-              ),
-              PokedexEntryCard(
-                pokemonID: 2,
-                pokemonName: 'Ivysaur',
-                pokemonTypes: ['grass', 'poison'],
-              ),
-              PokedexEntryCard(
-                pokemonID: 3,
-                pokemonName: 'Venusaur',
-                pokemonTypes: ['grass', 'poison'],
-              ),
-              PokedexEntryCard(
-                pokemonID: 4,
-                pokemonName: 'Charmander',
-                pokemonTypes: ['fire'],
-              ),
-              PokedexEntryCard(
-                pokemonID: 5,
-                pokemonName: 'Charmeleon',
-                pokemonTypes: ['fire'],
-              ),
-              PokedexEntryCard(
-                pokemonID: 6,
-                pokemonName: 'Charizard',
-                pokemonTypes: ['fire', 'flying'],
-              ),
-              PokedexEntryCard(
-                pokemonID: 7,
-                pokemonName: 'Squirtle',
-                pokemonTypes: ['water'],
-              ),
-              PokedexEntryCard(
-                pokemonID: 8,
-                pokemonName: 'Wartortle',
-                pokemonTypes: ['water'],
-              ),
-              PokedexEntryCard(
-                pokemonID: 9,
-                pokemonName: 'Blastoise',
-                pokemonTypes: ['water'],
+              SizedBox(height: 20),
+              Expanded(
+                child: ListView(
+                  children: pokedexEntries,
+                ),
               ),
               SizedBox(height: 30),
             ],

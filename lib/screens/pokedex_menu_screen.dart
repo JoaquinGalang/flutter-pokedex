@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pokedex/utils/constants.dart';
+import 'package:flutter_pokedex/services/pokeapi_service.dart';
 import 'package:flutter_pokedex/widgets/pokedex_search_bar.dart';
 import 'package:flutter_pokedex/widgets/pokedex_entry_card.dart';
 
 // TODO: Implement lazy loading principles.
-// TODO: Implement search feature.
+// TODO: Implement pokemon ability view
+// TODO: Implement pokemon weakness view
+// TODO: Fix flavor text bug (sometimes its in a different language)
+
 
 class PokedexMenuScreen extends StatefulWidget {
   PokedexMenuScreen({super.key});
@@ -14,18 +18,37 @@ class PokedexMenuScreen extends StatefulWidget {
 }
 
 class _PokedexMenuScreenState extends State<PokedexMenuScreen> {
+  final PokeApiService _pokeApiService = PokeApiService();
+  final TextEditingController _searchBarController = TextEditingController();
   List<Widget> pokedexEntries = [];
 
-  void loadPokedexEntries() {
-    for (int i = 1; i < 151; i++) {
-      Widget currentEntry = PokedexEntryCard(pokemonID: i);
-      pokedexEntries.add(currentEntry);
+  void loadPokedexEntries() async {
+
+    // Clear current pokedexEntries
+    setState(() {
+      pokedexEntries = [];
+    });
+
+    // Initialize search result list and a list of all matches
+    // When the search bar is an empty list, it loads all pokemon chronologically
+    List<Widget> searchResults = [];
+    List matchList =
+        await _pokeApiService.searchForPokemon(_searchBarController.text);
+
+    // Create a new pokedex entry card for each match and add it to the match list
+    for (int i = 0; i < matchList.length; i++) {
+      Widget currentEntry = PokedexEntryCard(name: matchList[i]);
+      searchResults.add(currentEntry);
     }
+
+    // Assign the search results to the new pokedex entries
+    setState(() {
+      pokedexEntries = searchResults;
+    });
   }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     loadPokedexEntries();
   }
@@ -49,14 +72,17 @@ class _PokedexMenuScreenState extends State<PokedexMenuScreen> {
                 style: kGrayDefaultTextStyle,
               ),
               const SizedBox(height: 10),
-              const PokedexSearchBar(),
+              PokedexSearchBar(
+                controller: _searchBarController,
+                onEditComplete: loadPokedexEntries,
+              ),
               const SizedBox(height: 20),
               Expanded(
                 child: ListView(
                   children: pokedexEntries,
                 ),
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
             ],
           ),
         ),

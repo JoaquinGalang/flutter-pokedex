@@ -7,7 +7,8 @@ import 'package:flutter_pokedex/widgets/exit_button.dart';
 import 'package:flutter_pokedex/widgets/physical_quantity_card.dart';
 import 'package:flutter_pokedex/widgets/stat_linear_indicator.dart';
 
-// TODO: Add flavor text, stats, and weaknesses
+// TODO: Add weaknesses and abilities
+// TODO: Add formatted abilities
 
 class PokedexEntryScreen extends StatefulWidget {
   const PokedexEntryScreen({super.key, required this.pokemonData});
@@ -29,6 +30,7 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
     'flavorText': null,
     'height': null,
     'weight': null,
+    'abilities': null,
   };
 
   Map<String, double> pokemonStats = {
@@ -68,6 +70,15 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
         id: widget.pokemonData['id']);
     flavorText = flavorText.replaceAll('', ' ');
     pokemon['flavorText'] = flavorText.replaceAll('\n', ' ');
+
+    // Load pokemon abilities
+    pokemon['abilities'] = [];
+
+    List abilityList = widget.pokemonData['abilities'];
+    for (int i = 0; i < abilityList.length; i++) {
+      String currentAbility = abilityList[0]['ability']['name'];
+      pokemon['abilities'].add(currentAbility);
+    }
 
     // Load and format weight and height
     String height =
@@ -116,7 +127,6 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     loadPokedexEntry();
   }
@@ -250,7 +260,15 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
                               PokemonTypeBox(type: 'electric'),
                               PokemonTypeBox(type: 'grass'),
                             ],
-                          )
+                          ),
+                          const SizedBox(height: 15),
+                          const Text('Weaknesses', style: kHeaderTextStyle),
+                          const Row(
+                            children: [
+                              PokemonTypeBox(type: 'electric'),
+                              PokemonTypeBox(type: 'grass'),
+                            ],
+                          ),
                         ],
                       ),
                     ),

@@ -4,7 +4,12 @@ import 'package:flutter_pokedex/utils/constants.dart';
 class PokedexSearchBar extends StatelessWidget {
   const PokedexSearchBar({
     super.key,
+    required this.controller,
+    required this.onEditComplete,
   });
+
+  final TextEditingController controller;
+  final VoidCallback onEditComplete;
 
   @override
   Widget build(BuildContext context) {
@@ -13,11 +18,13 @@ class PokedexSearchBar extends StatelessWidget {
         color: kGrayColor200,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: const Padding(
-        padding: EdgeInsets.all(8.0),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
         child: TextField(
+          controller: controller,
+          onEditingComplete: onEditComplete,
           cursorColor: Colors.black,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
               border: InputBorder.none,
               prefixIcon: Icon(Icons.search, size: 28),
               prefixIconColor: kGrayColor600,

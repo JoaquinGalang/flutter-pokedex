@@ -4,10 +4,32 @@ import 'package:http/http.dart' as http;
 
 class PokeApiService {
   final String urlPrefix = 'https://pokeapi.co/api/v2';
+  final int lastPokedexID = 1024;
 
-  dynamic getPokemonData({required int id}) async {
-    print('$urlPrefix/pokemon/$id');
-    var url = Uri.parse('$urlPrefix/pokemon/$id');
+  dynamic searchForPokemon(String search) async {
+
+    // Fetch all pokemon data
+    var url = Uri.parse('$urlPrefix/pokemon?limit=$lastPokedexID');
+    var response = await http.get(url);
+    var jsonData = jsonDecode(response.body);
+    List pokemonList = jsonData['results'];
+
+    // Compare each pokemon name to the user's search and add matches to a list
+    List pokemonMatches = [];
+    for (int i = 0; i < pokemonList.length; i++) {
+      String currentPokemon = pokemonList[i]['name'];
+      if (currentPokemon.contains(search)) {
+        pokemonMatches.add(currentPokemon);
+      }
+    }
+
+    // Return match list
+    return pokemonMatches;
+  }
+
+  dynamic getPokemonData(dynamic searchField) async {
+    print('$urlPrefix/pokemon/$searchField');
+    var url = Uri.parse('$urlPrefix/pokemon/$searchField');
     var response = await http.get(url);
     var jsonData = jsonDecode(response.body);
     return jsonData;

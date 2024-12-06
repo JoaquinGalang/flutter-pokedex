@@ -6,12 +6,14 @@ import 'package:flutter_pokedex/utils/helper_functions.dart';
 import 'package:flutter_pokedex/widgets/pokemon_type_box.dart';
 
 class PokedexEntryCard extends StatefulWidget {
-  PokedexEntryCard({
+  const PokedexEntryCard({
     super.key,
-    required this.pokemonID,
+    this.id,
+    this.name,
   });
 
-  final int pokemonID;
+  final int? id;
+  final String? name;
 
   @override
   State<PokedexEntryCard> createState() => _PokedexEntryCardState();
@@ -19,7 +21,10 @@ class PokedexEntryCard extends StatefulWidget {
 
 class _PokedexEntryCardState extends State<PokedexEntryCard> {
   final PokeApiService pokeApiService = PokeApiService();
+  var searchField;
+
   Map? pokemonData;
+  int? pokemonID;
   String? pokemonName;
   List? pokemonTypes;
   bool _isLoading = true;
@@ -42,9 +47,14 @@ class _PokedexEntryCardState extends State<PokedexEntryCard> {
   }
 
   Future<void> loadPokemonData() async {
-    pokemonData = await pokeApiService.getPokemonData(id: widget.pokemonID);
+    // Get pokemon data depending on the search field (can be name or id)
+    searchField = widget.id ?? widget.name;
+    pokemonData = await pokeApiService.getPokemonData(searchField);
+    pokemonID = pokemonData!['id'];
     pokemonName = pokemonData!['name'];
     pokemonTypes = getPokemonTypes(pokemonData!['types']);
+
+    // Once data has been fetched, set the loading variable to false
     setState(() {
       _isLoading = false;
     });
@@ -62,6 +72,7 @@ class _PokedexEntryCardState extends State<PokedexEntryCard> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: GestureDetector(
         onTap: () {
+          // Only allow button click when the card is done loading
           if (!_isLoading) {
             Navigator.push(
               context,
@@ -82,9 +93,13 @@ class _PokedexEntryCardState extends State<PokedexEntryCard> {
             borderRadius: BorderRadius.circular(15),
           ),
           child: (_isLoading)
+
+              // If the card data is still loading, display loading indicator
               ? const Center(
                   child: CircularProgressIndicator(),
                 )
+
+              // If the card is done loading, display the pokedex entry card
               : Padding(
                   padding: const EdgeInsets.all(10),
                   child: Row(
@@ -93,7 +108,7 @@ class _PokedexEntryCardState extends State<PokedexEntryCard> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(formatPokemonID(widget.pokemonID)),
+                          Text(formatPokemonID(pokemonID!)),
                           Text(
                             pokemonName!.capitalize(),
                             style: const TextStyle(
@@ -109,7 +124,7 @@ class _PokedexEntryCardState extends State<PokedexEntryCard> {
                       ),
                       Image(
                         image: NetworkImage(
-                            'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${widget.pokemonID}.png'),
+                            'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonData!['id']}.png'),
                       )
                     ],
                   ),

@@ -14,6 +14,12 @@ String formatPokemonID(int pokemonID) {
   return formattedID;
 }
 
+String formatPokemonAbility(String pokemonAbility) {
+  String formattedAbility = pokemonAbility.replaceAll('-', ' ');
+  formattedAbility = formattedAbility.capitalize();
+  return formattedAbility;
+}
+
 double calculateMaxHP(double baseStat) {
   double maxHP = ((baseStat * 2 + maxIV + (maxEV ~/ 4)) + 110);
   return maxHP;

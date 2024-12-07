@@ -22,7 +22,7 @@ class _PokedexMenuScreenState extends State<PokedexMenuScreen> {
   final TextEditingController _searchBarController = TextEditingController();
   List<Widget> pokedexEntries = [];
 
-  void loadPokedexEntries() async {
+  void loadPokedexEntries(String search) async {
 
     // Clear current pokedexEntries
     setState(() {
@@ -33,7 +33,7 @@ class _PokedexMenuScreenState extends State<PokedexMenuScreen> {
     // When the search bar is an empty list, it loads all pokemon chronologically
     List<Widget> searchResults = [];
     List matchList =
-        await _pokeApiService.searchForPokemon(_searchBarController.text);
+        await _pokeApiService.searchForPokemon(search);
 
     // Create a new pokedex entry card for each match and add it to the match list
     for (int i = 0; i < matchList.length; i++) {
@@ -50,7 +50,7 @@ class _PokedexMenuScreenState extends State<PokedexMenuScreen> {
   @override
   void initState() {
     super.initState();
-    loadPokedexEntries();
+    loadPokedexEntries(_searchBarController.text);
   }
 
   @override
@@ -74,7 +74,7 @@ class _PokedexMenuScreenState extends State<PokedexMenuScreen> {
               const SizedBox(height: 10),
               PokedexSearchBar(
                 controller: _searchBarController,
-                onEditComplete: loadPokedexEntries,
+                onChanged: loadPokedexEntries,
               ),
               const SizedBox(height: 20),
               Expanded(

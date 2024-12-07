@@ -16,8 +16,6 @@ class AbilityBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      height: 300,
       decoration: const BoxDecoration(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(90),
@@ -28,6 +26,7 @@ class AbilityBottomSheet extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Align(
               alignment: Alignment.topCenter,
@@ -40,13 +39,14 @@ class AbilityBottomSheet extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 25),
+            const SizedBox(height: 20),
             Text(
               ability,
               style: kAbilityTitleTextStyle.copyWith(color: color),
             ),
             const SizedBox(height: 10),
             Text(description, style: kGrayDefaultTextStyle),
+            const SizedBox(height: 25),
           ],
         ),
       ),

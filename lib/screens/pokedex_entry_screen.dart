@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pokedex/utils/constants.dart';
 import 'package:flutter_pokedex/utils/helper_functions.dart';
 import 'package:flutter_pokedex/services/pokeapi_service.dart';
+import 'package:flutter_pokedex/widgets/ability_bottom_sheet.dart';
 import 'package:flutter_pokedex/widgets/pokemon_type_box.dart';
 import 'package:flutter_pokedex/widgets/exit_button.dart';
 import 'package:flutter_pokedex/widgets/physical_quantity_card.dart';
 import 'package:flutter_pokedex/widgets/stat_linear_indicator.dart';
+import 'package:flutter_pokedex/widgets/ability_link.dart';
 
 // TODO: Add weaknesses and abilities
-// TODO: Add formatted abilities
+// TODO: Add ability description
 
 class PokedexEntryScreen extends StatefulWidget {
   const PokedexEntryScreen({super.key, required this.pokemonData});
@@ -56,7 +58,6 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
   bool _isLoading = true;
 
   Future<void> loadPokedexEntry() async {
-
     // Load pokemon essential pokemon details (e.g name, id, types, etc.)
     pokemon['id'] = formatPokemonID(widget.pokemonData['id']);
     String name = widget.pokemonData['name'];
@@ -76,7 +77,7 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
 
     List abilityList = widget.pokemonData['abilities'];
     for (int i = 0; i < abilityList.length; i++) {
-      String currentAbility = abilityList[0]['ability']['name'];
+      String currentAbility = abilityList[i]['ability']['name'];
       pokemon['abilities'].add(currentAbility);
     }
 
@@ -88,20 +89,31 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
         '${(widget.pokemonData['weight'] / 4.536).toStringAsFixed(2)} lbs';
 
     // Load pokemon base base stats
-    pokemonStats['hitPoints'] = widget.pokemonData['stats'][0]['base_stat'].toDouble();
-    pokemonStats['attack'] = widget.pokemonData['stats'][1]['base_stat'].toDouble();
-    pokemonStats['defense'] = widget.pokemonData['stats'][2]['base_stat'].toDouble();
-    pokemonStats['specialAtk'] = widget.pokemonData['stats'][3]['base_stat'].toDouble();
-    pokemonStats['specialDef'] = widget.pokemonData['stats'][4]['base_stat'].toDouble();
-    pokemonStats['speed'] = widget.pokemonData['stats'][5]['base_stat'].toDouble();
+    pokemonStats['hitPoints'] =
+        widget.pokemonData['stats'][0]['base_stat'].toDouble();
+    pokemonStats['attack'] =
+        widget.pokemonData['stats'][1]['base_stat'].toDouble();
+    pokemonStats['defense'] =
+        widget.pokemonData['stats'][2]['base_stat'].toDouble();
+    pokemonStats['specialAtk'] =
+        widget.pokemonData['stats'][3]['base_stat'].toDouble();
+    pokemonStats['specialDef'] =
+        widget.pokemonData['stats'][4]['base_stat'].toDouble();
+    pokemonStats['speed'] =
+        widget.pokemonData['stats'][5]['base_stat'].toDouble();
 
     // Load pokemon max stats
     pokemonMaxStats['hitPoints'] = calculateMaxHP(pokemonStats['hitPoints']!);
-    pokemonMaxStats['attack'] = calculateMaxStat(baseStat: pokemonStats['attack']!);
-    pokemonMaxStats['defense'] = calculateMaxStat(baseStat: pokemonStats['defense']!);
-    pokemonMaxStats['specialAtk'] = calculateMaxStat(baseStat: pokemonStats['specialAtk']!);
-    pokemonMaxStats['specialDef'] = calculateMaxStat(baseStat: pokemonStats['specialDef']!);
-    pokemonMaxStats['speed'] = calculateMaxStat(baseStat: pokemonStats['speed']!);
+    pokemonMaxStats['attack'] =
+        calculateMaxStat(baseStat: pokemonStats['attack']!);
+    pokemonMaxStats['defense'] =
+        calculateMaxStat(baseStat: pokemonStats['defense']!);
+    pokemonMaxStats['specialAtk'] =
+        calculateMaxStat(baseStat: pokemonStats['specialAtk']!);
+    pokemonMaxStats['specialDef'] =
+        calculateMaxStat(baseStat: pokemonStats['specialDef']!);
+    pokemonMaxStats['speed'] =
+        calculateMaxStat(baseStat: pokemonStats['speed']!);
 
     setState(() {
       _isLoading = false;
@@ -123,6 +135,37 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
       typeList.add(type);
     }
     return typeList;
+  }
+
+  List<Widget> pokemonAbilityBuilder(List pokemonAbilities) {
+    List<Widget> abilityList = [];
+
+    // Build a text widget for each listed ability
+    for (int i = 0; i < pokemon['abilities'].length; i++) {
+      String ability = formatPokemonAbility(pokemon['abilities'][i]);
+      // String description = _pokeApiService.getAbilityEffect(ability);
+      String description = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.';
+      Widget abilityLink = AbilityLink(
+        ability: ability,
+        brightColor: brightColor,
+        onTap: () {
+          print(ability);
+          showModalBottomSheet(
+            context: context,
+            builder: (BuildContext context) {
+              return AbilityBottomSheet(
+                ability: ability,
+                description: description,
+                color: darkColor!,
+              );
+            },
+          );
+        },
+      );
+      abilityList.add(abilityLink);
+    }
+
+    return abilityList;
   }
 
   @override
@@ -254,12 +297,11 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
                             ],
                           ),
                           const SizedBox(height: 15),
-                          const Text('Weaknesses', style: kHeaderTextStyle),
-                          const Row(
-                            children: [
-                              PokemonTypeBox(type: 'electric'),
-                              PokemonTypeBox(type: 'grass'),
-                            ],
+                          const Text('Abilities', style: kHeaderTextStyle),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children:
+                                pokemonAbilityBuilder(pokemon['abilities']),
                           ),
                           const SizedBox(height: 15),
                           const Text('Weaknesses', style: kHeaderTextStyle),

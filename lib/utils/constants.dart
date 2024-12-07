@@ -76,3 +76,8 @@ const TextStyle kLightGrayDefaultTextStyle = TextStyle(
   fontSize: 16,
   color: kGrayColor500,
 );
+
+const TextStyle kAbilityTitleTextStyle = TextStyle(
+  fontSize: 28,
+  fontWeight: FontWeight.bold,
+);

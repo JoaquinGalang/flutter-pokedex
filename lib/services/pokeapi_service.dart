@@ -42,4 +42,12 @@ class PokeApiService {
     return jsonData['flavor_text_entries'][0]['flavor_text'];
   }
 
+  Future<String> getAbilityEffect(String ability) async {
+    var url = Uri.parse('$urlPrefix/ability/$ability');
+    var response = await http.get(url);
+    var jsonData = jsonDecode(response.body);
+    String effect = jsonData['effect_entries'][0]['effect'];
+    return effect;
+  }
+
 }

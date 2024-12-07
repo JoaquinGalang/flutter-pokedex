@@ -36,18 +36,40 @@ class PokeApiService {
   }
 
   dynamic getPokemonFlavorText({required int id}) async {
+
+    // Fetch pokemon species data from PokeAPI
     var url = Uri.parse('$urlPrefix/pokemon-species/$id');
     var response = await http.get(url);
     var jsonData = jsonDecode(response.body);
-    return jsonData['flavor_text_entries'][0]['flavor_text'];
+
+    // Iterate through flavor text entries and return the first english flavor text description
+    List flavorTextEntries = jsonData['flavor_text_entries'];
+    String? flavorText;
+    for (int i = 0; i < flavorTextEntries.length; i++) {
+      if (flavorTextEntries[i]['language']['name'] == 'en') {
+        flavorText = flavorTextEntries[i]['flavor_text'];
+      }
+    }
+    return flavorText;
   }
 
   Future<String> getAbilityEffect(String ability) async {
+
+    // Fetch ability data from PokeAPI
     var url = Uri.parse('$urlPrefix/ability/$ability');
     var response = await http.get(url);
     var jsonData = jsonDecode(response.body);
-    String effect = jsonData['effect_entries'][0]['effect'];
-    return effect;
+
+    // Iterate through effect entries and return the first english effect description
+    List effectEntries = jsonData['effect_entries'];
+    String? effect;
+    for (int i = 0; i < effectEntries.length; i++) {
+      if (effectEntries[i]['language']['name'] == 'en') {
+        effect = effectEntries[i]['effect'];
+        break;
+      }
+    }
+    return effect!;
   }
 
 }

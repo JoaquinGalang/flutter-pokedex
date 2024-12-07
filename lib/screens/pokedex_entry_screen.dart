@@ -9,8 +9,7 @@ import 'package:flutter_pokedex/widgets/physical_quantity_card.dart';
 import 'package:flutter_pokedex/widgets/stat_linear_indicator.dart';
 import 'package:flutter_pokedex/widgets/ability_link.dart';
 
-// TODO: Add weaknesses and abilities
-// TODO: Add ability description
+// TODO: Add weaknesses
 
 class PokedexEntryScreen extends StatefulWidget {
   const PokedexEntryScreen({super.key, required this.pokemonData});
@@ -78,7 +77,12 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
     List abilityList = widget.pokemonData['abilities'];
     for (int i = 0; i < abilityList.length; i++) {
       String currentAbility = abilityList[i]['ability']['name'];
-      pokemon['abilities'].add(currentAbility);
+      String currentEffect = await _pokeApiService.getAbilityEffect(currentAbility);
+      Map abilityData = {
+        'ability': currentAbility,
+        'effect': currentEffect,
+      };
+      pokemon['abilities'].add(abilityData);
     }
 
     // Load and format weight and height
@@ -137,14 +141,14 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
     return typeList;
   }
 
-  List<Widget> pokemonAbilityBuilder(List pokemonAbilities) {
+  List<Widget> pokemonAbilityBuilder() {
     List<Widget> abilityList = [];
 
     // Build a text widget for each listed ability
     for (int i = 0; i < pokemon['abilities'].length; i++) {
-      String ability = formatPokemonAbility(pokemon['abilities'][i]);
+      String ability = formatPokemonAbility(pokemon['abilities'][i]['ability']);
       // String description = _pokeApiService.getAbilityEffect(ability);
-      String description = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.';
+      String description = pokemon['abilities'][i]['effect'];
       Widget abilityLink = AbilityLink(
         ability: ability,
         brightColor: brightColor,
@@ -301,7 +305,7 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children:
-                                pokemonAbilityBuilder(pokemon['abilities']),
+                                pokemonAbilityBuilder(),
                           ),
                           const SizedBox(height: 15),
                           const Text('Weaknesses', style: kHeaderTextStyle),

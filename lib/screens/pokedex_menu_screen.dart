@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_pokedex/utils/constants.dart';
 import 'package:flutter_pokedex/services/pokeapi_service.dart';
@@ -19,53 +21,85 @@ class PokedexMenuScreen extends StatefulWidget {
 class _PokedexMenuScreenState extends State<PokedexMenuScreen> {
   final PokeApiService _pokeApiService = PokeApiService();
   final TextEditingController _searchBarController = TextEditingController();
+  final ScrollController _pokedexEntryScrollController = ScrollController();
   bool _isLoading = true;
   int maxEntries = 15;
+  int? numberOfEntries;
 
   List<Widget> pokedexEntries = [];
+  List matchList = [];
 
   void loadPokedexEntries() async {
-    // Clear current pokedexEntries
     setState(() {
       _isLoading = true;
-      maxEntries += 15;
-      pokedexEntries = pokedexEntries;
+      maxEntries = 15;
     });
+    await findPokemonMatches();
+    await buildPokedexEntries();
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  Future<void> findPokemonMatches() async {
+    matchList =
+        await _pokeApiService.searchForPokemon(_searchBarController.text);
+  }
+
+  Future<void> buildPokedexEntries() async {
+    // Set loading to true
 
     // Initialize search result list and a list of all matches
     // When the search bar is an empty list, it loads all pokemon chronologically
     List<Widget> searchResults = [];
-    List matchList =
-        await _pokeApiService.searchForPokemon(_searchBarController.text);
 
-    int numberOfEntries =
+    // Get number of entries
+    numberOfEntries =
         (matchList.length < maxEntries) ? matchList.length : maxEntries;
 
     // Create a new pokedex entry card for each match and add it to the match list
-    for (int i = 0; i < numberOfEntries; i++) {
+    for (int i = 0; i < numberOfEntries!; i++) {
       Map<String, dynamic> pokemonData =
           await _pokeApiService.getPokemonData(matchList[i]);
       Widget currentEntry = PokedexEntryCard(data: pokemonData);
       searchResults.add(currentEntry);
     }
 
-    Widget loadMoreButton = LoadMoreButton(isLoading: !_isLoading, onPressed: loadMorePokedexEntries);
+    Widget loadMoreButton = LoadMoreButton(onPressed: loadMorePokedexEntries);
 
-    if (matchList.length > 15) {
+    if (numberOfEntries! < matchList.length) {
       searchResults.add(loadMoreButton);
     }
 
     // Assign the search results to the new pokedex entries
     setState(() {
-      _isLoading = false;
       pokedexEntries = searchResults;
     });
   }
 
-  void loadMorePokedexEntries() {
+  Future<void> loadMorePokedexEntries() async {
+    int previousMaxEntries = maxEntries;
+    maxEntries = (matchList.length < maxEntries + 15)
+        ? matchList.length
+        : maxEntries + 15;
+    List<Widget> newEntries = [];
+    for (int i = previousMaxEntries; i < maxEntries; i++) {
+      Map<String, dynamic> pokemonData =
+          await _pokeApiService.getPokemonData(matchList[i]);
+      Widget currentEntry = PokedexEntryCard(data: pokemonData);
+      newEntries.add(currentEntry);
+    }
+
+    Widget loadMoreButton = LoadMoreButton(onPressed: loadMorePokedexEntries);
+
+    if (maxEntries < matchList.length) {
+      newEntries.add(loadMoreButton);
+    }
+
+    pokedexEntries.removeLast();
+
     setState(() {
-      maxEntries += 15;
-      loadPokedexEntries();
+      pokedexEntries = pokedexEntries + newEntries;
     });
   }
 
@@ -103,6 +137,7 @@ class _PokedexMenuScreenState extends State<PokedexMenuScreen> {
                 child: (_isLoading)
                     ? const PokeballLoadingIndicator()
                     : ListView(
+                        controller: _pokedexEntryScrollController,
                         children: pokedexEntries,
                       ),
               ),

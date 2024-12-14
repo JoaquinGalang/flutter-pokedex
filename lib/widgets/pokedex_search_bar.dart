@@ -5,11 +5,11 @@ class PokedexSearchBar extends StatelessWidget {
   const PokedexSearchBar({
     super.key,
     required this.controller,
-    required this.onChanged,
+    required this.onEditingComplete,
   });
 
   final TextEditingController controller;
-  final void Function(String) onChanged;
+  final void Function() onEditingComplete;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class PokedexSearchBar extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: TextField(
           controller: controller,
-          onChanged: onChanged,
+          onEditingComplete: onEditingComplete,
           cursorColor: Colors.black,
           decoration: const InputDecoration(
               border: InputBorder.none,

@@ -6,7 +6,7 @@ class PokeApiService {
   final String urlPrefix = 'https://pokeapi.co/api/v2';
   final int lastPokedexID = 1024;
 
-  dynamic searchForPokemon(String search) async {
+  Future<List> searchForPokemon(String search) async {
 
     // Fetch all pokemon data
     var url = Uri.parse('$urlPrefix/pokemon?limit=$lastPokedexID');
@@ -27,7 +27,7 @@ class PokeApiService {
     return pokemonMatches;
   }
 
-  dynamic getPokemonData(dynamic searchField) async {
+  Future<Map<String, dynamic>> getPokemonData(dynamic searchField) async {
     print('$urlPrefix/pokemon/$searchField');
     var url = Uri.parse('$urlPrefix/pokemon/$searchField');
     var response = await http.get(url);
@@ -35,7 +35,7 @@ class PokeApiService {
     return jsonData;
   }
 
-  dynamic getPokemonFlavorText({required int id}) async {
+  Future<String> getPokemonFlavorText({required int id}) async {
 
     // Fetch pokemon species data from PokeAPI
     var url = Uri.parse('$urlPrefix/pokemon-species/$id');
@@ -50,7 +50,7 @@ class PokeApiService {
         flavorText = flavorTextEntries[i]['flavor_text'];
       }
     }
-    return flavorText;
+    return flavorText!;
   }
 
   Future<String> getAbilityEffect(String ability) async {

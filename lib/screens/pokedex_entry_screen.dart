@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pokedex/utils/constants.dart';
 import 'package:flutter_pokedex/utils/helper_functions.dart';
 import 'package:flutter_pokedex/services/pokeapi_service.dart';
+import 'package:flutter_pokedex/widgets/pokeball_loading_indicator.dart';
 import 'package:flutter_pokedex/widgets/ability_bottom_sheet.dart';
 import 'package:flutter_pokedex/widgets/pokemon_type_box.dart';
 import 'package:flutter_pokedex/widgets/exit_button.dart';
@@ -22,6 +23,7 @@ class PokedexEntryScreen extends StatefulWidget {
 
 class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
   final PokeApiService _pokeApiService = PokeApiService();
+  bool _isLoading = true;
 
   Map<String, dynamic> pokemon = {
     'id': null,
@@ -54,7 +56,6 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
 
   Color? brightColor;
   Color? darkColor;
-  bool _isLoading = true;
 
   Future<void> loadPokedexEntry() async {
     // Load pokemon essential pokemon details (e.g name, id, types, etc.)
@@ -191,9 +192,7 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
             ),
             Expanded(
               child: (_isLoading)
-                  ? const Center(
-                      child: CircularProgressIndicator(),
-                    )
+                  ? const PokeballLoadingIndicator()
                   : Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: ListView(

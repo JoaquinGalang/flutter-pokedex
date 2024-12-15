@@ -28,12 +28,13 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
   Map<String, dynamic> pokemon = {
     'id': null,
     'name': null,
-    'pokemonTypes': [],
+    'types': [],
     'image': null,
     'flavorText': null,
     'height': null,
     'weight': null,
     'abilities': null,
+    'weaknesses': [],
   };
 
   Map<String, double> pokemonStats = {
@@ -62,12 +63,12 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
     pokemon['id'] = formatPokemonID(widget.pokemonData['id']);
     String name = widget.pokemonData['name'];
     pokemon['name'] = name.capitalize();
-    pokemon['pokemonTypes'] = getPokemonTypes(widget.pokemonData['types']);
-    pokemon['primaryType'] = pokemon['pokemonTypes'][0];
+    pokemon['types'] = getPokemonTypes(widget.pokemonData['types']);
+    pokemon['primaryType'] = pokemon['types'][0];
     brightColor = brightColors[pokemon['primaryType']];
     darkColor = darkColors[pokemon['primaryType']];
     pokemon['image'] = widget.pokemonData['sprites']['front_default'];
-    String flavorText = await _pokeApiService.getPokemonFlavorText(
+    String flavorText = await _pokeApiService.getFlavorText(
         id: widget.pokemonData['id']);
     flavorText = flavorText.replaceAll('', ' ');
     pokemon['flavorText'] = flavorText.replaceAll('\n', ' ');
@@ -120,12 +121,17 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
     pokemonMaxStats['speed'] =
         calculateMaxStat(baseStat: pokemonStats['speed']!);
 
+    print(pokemon);
+
+    // Load weaknesses
+    pokemon['weaknesses'] = await getPokemonWeaknesses(pokemon['types']);
+
     setState(() {
       _isLoading = false;
     });
   }
 
-  List<Widget> pokemonTypeCardBuilder(List<String> pokemonTypes) {
+  List<Widget> pokemonTypeCardBuilder(List pokemonTypes) {
     List<Widget> typeCardList = [];
     for (var type in pokemonTypes) {
       typeCardList.add(PokemonTypeBox(type: type));
@@ -140,6 +146,65 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
       typeList.add(type);
     }
     return typeList;
+  }
+
+  Future<List<String>> getPokemonWeaknesses(List types) async {
+    Map<String, double> pokemonWeaknessChart = {
+      'normal': 1,
+      'fire': 1,
+      'water': 1,
+      'electric': 1,
+      'grass': 1,
+      'ice': 1,
+      'fighting': 1,
+      'poison': 1,
+      'ground': 1,
+      'flying': 1,
+      'psychic': 1,
+      'bug': 1,
+      'rock': 1,
+      'ghost': 1,
+      'dragon': 1,
+      'dark': 1,
+      'steel': 1,
+      'fairy': 1,
+    };
+    List typeDataList = [];
+    List<String> pokemonWeaknesses = [];
+    for (String type in types) {
+      Map<String, dynamic> typeData = await _pokeApiService.getTypeData(type);
+
+      List weaknesses = typeData['double_damage_from'];
+      for (int i = 0; i < weaknesses.length; i++) {
+        String weakness = weaknesses[i]['name'];
+        double value = pokemonWeaknessChart[weakness]!;
+        pokemonWeaknessChart[weakness] = value * 2;
+      }
+
+      List resistances = typeData['half_damage_from'];
+      for (int i = 0; i < resistances.length; i++) {
+        String resistance = resistances[i]['name'];
+        double value = pokemonWeaknessChart[resistance]!;
+        pokemonWeaknessChart[resistance] = value * 0.5;
+      }
+
+      List immunities = typeData['no_damage_from'];
+      for (int i = 0; i < immunities.length; i++) {
+        String immunity = immunities[i]['name'];
+        double value = pokemonWeaknessChart[immunity]!;
+        pokemonWeaknessChart[immunity] = 0;
+      }
+    }
+
+    for (int i = 0; i < kPokemonTypes.length; i++) {
+      String currentType = kPokemonTypes[i];
+      double weaknessScore = pokemonWeaknessChart[currentType]!;
+      if (weaknessScore > 1) {
+        pokemonWeaknesses.add(currentType);
+      }
+    }
+
+    return pokemonWeaknesses;
   }
 
   List<Widget> pokemonAbilityBuilder() {
@@ -231,7 +296,7 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
                                             style: kTitleTextStyle),
                                         Row(
                                           children: pokemonTypeCardBuilder(
-                                              pokemon['pokemonTypes']),
+                                              pokemon['types']),
                                         )
                                       ],
                                     ),
@@ -308,11 +373,8 @@ class _PokedexEntryScreenState extends State<PokedexEntryScreen> {
                           ),
                           const SizedBox(height: 15),
                           const Text('Weaknesses', style: kHeaderTextStyle),
-                          const Row(
-                            children: [
-                              PokemonTypeBox(type: 'electric'),
-                              PokemonTypeBox(type: 'grass'),
-                            ],
+                          Row(
+                            children: pokemonTypeCardBuilder(pokemon['weaknesses']),
                           ),
                         ],
                       ),

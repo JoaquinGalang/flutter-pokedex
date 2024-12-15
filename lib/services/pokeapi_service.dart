@@ -35,7 +35,7 @@ class PokeApiService {
     return jsonData;
   }
 
-  Future<String> getPokemonFlavorText({required int id}) async {
+  Future<String> getFlavorText({required int id}) async {
 
     // Fetch pokemon species data from PokeAPI
     var url = Uri.parse('$urlPrefix/pokemon-species/$id');
@@ -70,6 +70,14 @@ class PokeApiService {
       }
     }
     return effect!;
+  }
+
+  Future<Map<String, dynamic>> getTypeData(String type) async {
+    var url = Uri.parse('$urlPrefix/type/$type');
+    var response = await http.get(url);
+    var jsonData = jsonDecode(response.body);
+    Map<String, dynamic> typeData = jsonData['damage_relations'];
+    return typeData;
   }
 
 }

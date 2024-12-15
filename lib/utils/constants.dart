@@ -56,6 +56,16 @@ final Map<String, Color> darkColors = {
   'fairy': const Color(0xFFB3687A),
 };
 
+// Pokemon Type List
+const List<String> kPokemonTypes = [
+  'normal', 'fire', 'water',
+  'electric', 'grass', 'ice',
+  'fighting', 'poison', 'ground',
+  'flying', 'psychic', 'bug',
+  'rock', 'ghost', 'dragon',
+  'dark', 'steel', 'fairy'
+];
+
 // Text Styles
 const TextStyle kTitleTextStyle = TextStyle(
   fontSize: 32,
